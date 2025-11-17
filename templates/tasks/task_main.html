@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+  <h2>My Tasks</h2>
+
+  <!-- search -->
+  <input type="text" id="search-input" class="form-control mb-3" placeholder="Search tasks..." />
+
+  <!-- add task -->
+  <button class="btn btn-primary mb-3" id="add-task-btn">Add Task</button>
+
+  <!-- tasks list -->
+  <div id="task-container">
+    {% include 'tasks/partials/task_list.html' %}
+  </div>
+</div>
+
+<!-- Form Modal -->
+<div class="modal fade" id="taskModal" tabindex="-1" aria-labelledby="taskModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="taskModalLabel">Task Form</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="modal-body">
+        <!-- form will uploaded by AJAX -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- JavaScript -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  //instantly search
+  document.getElementById('search-input').addEventListener('keyup', function () {
+    const query = this.value;
+    fetch(`/tasks/ajax/search/?q=${query}`)
+      .then(res => res.text())
+      .then(data => {
+        document.getElementById('task-container').innerHTML = data;
+      });
+  });
+
+  //instantly Add task
+  document.getElementById('add-task-btn').addEventListener('click', function () {
+    fetch('/tasks/ajax/create/')
+      .then(res => res.text())
+      .then(data => {
+        document.getElementById('modal-body').innerHTML = data;
+        new bootstrap.Modal(document.getElementById('taskModal')).show();
+      });
+  });
+
+  // will add update , toggle status,delete
+});
+</script>
+{% endblock %}
