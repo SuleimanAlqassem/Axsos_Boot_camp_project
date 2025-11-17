@@ -6,7 +6,8 @@ Repository for bootcamp project in Django
 ## Task Manager Project Overview
 Task Manager is a web application for managing daily tasks.  
 It allows users to register, log in, and organize their tasks efficiently.  
-The system provides CRUD operations, AJAX-based dynamic updates, responsive design, and deployment on AWS.  
+The system provides CRUD operations, AJAX-based dynamic updates, responsive design, and deployment on AWS.
+The system includes modular models for tasks, projects, and notes, allowing scalable task organization. 
 Future scope includes adding smart features like task prioritization and productivity insights.
 
 ---
@@ -22,6 +23,12 @@ Future scope includes adding smart features like task prioritization and product
   - `POST /api/tasks` → Adds a new task
 - Security: CSRF protection, input validation, password hashing
 - Deployment on AWS (EC2 + MySQL RDS + Nginx + Gunicorn)
+- Project Management (Create, Assign, View Projects)
+- Notes on Tasks (Add contextual notes per task)
+- Soft Delete & Archive (Trash view for deleted tasks)
+- Task Prioritization (Low, Medium, High, Critical)
+- Status Tracking (To Do, In Progress, Done, Archived)
+
 
 ---
 
@@ -42,13 +49,16 @@ Future scope includes adding smart features like task prioritization and product
 
 ## ERD Diagram
 **Entities:**
+- **Project:** id, name, description, owner_id (FK → User), created_at, updated_at
 - **User:** id, email, password, name, date_joined
 - **Task:** id, title, description, status, owner_id (FK → User), created_at, updated_at
 - **Note:** id, task_id (FK → Task), body, created_at
 
 **Relationships:**
-- User ↔ Task (1:N)
+- User ↔ Project (1:N)
+- Project ↔ Task (1:N)
 - Task ↔ Note (1:N)
+
 
 ---
 
@@ -58,6 +68,10 @@ Future scope includes adding smart features like task prioritization and product
 - Task List (CRUD operations with AJAX search)
 - Task Detail (Task info + dynamic updates)
 - About Us Page
+- Project Creation Page
+- Note Addition Modal or Page
+- Trash View (Archived/Deleted Tasks)
+
 
 ---
 
@@ -65,3 +79,8 @@ Future scope includes adding smart features like task prioritization and product
 - Task prioritization
 - Reminders and productivity insights
 - Integration with external APIs (e.g., calendar, notifications)
+- Project-level analytics
+- Tag-based filtering
+- Multi-user collaboration (future)
+- Calendar integration for due dates
+
