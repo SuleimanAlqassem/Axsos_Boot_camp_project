@@ -1,0 +1,13 @@
+{% for task in tasks %}
+  <div class="task-item" data-id="{{ task.id }}">
+    <strong>{{ task.title }}</strong>
+    <span>{{ task.description }}</span>
+    <button class="btn btn-sm btn-danger delete-task" data-id="{{ task.id }}">Delete</button>
+    <button class="btn btn-sm btn-secondary edit-task" data-id="{{ task.id }}">Edit</button>
+    <button class="btn btn-sm btn-success toggle-status" data-id="{{ task.id }}">
+      {% if task.status %}✔{% else %}⏳{% endif %}
+    </button>
+  </div>
+{% empty %}
+  <p>No tasks found.</p>
+{% endfor %}
