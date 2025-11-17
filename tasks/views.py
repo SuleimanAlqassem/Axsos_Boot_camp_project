@@ -4,9 +4,11 @@ from .forms import TaskForm
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 
+
 @login_required
 def task_main(request):
-    return render(request, 'tasks/task_main.html')
+    tasks = Task.objects.filter(owner=request.user, is_deleted=False).order_by('-created_at')
+    return render(request, 'tasks/task_main.html',{'tasks': tasks})
 
 @login_required
 def ajax_task_list(request):
@@ -50,7 +52,12 @@ def ajax_task_delete(request, pk):
 @login_required
 def ajax_task_toggle_status(request, pk):
     task = get_object_or_404(Task, pk=pk, owner=request.user)
-    task.status = not task.status
+    Status = Task.Status
+    if task.status == Status.DONE:
+        task.status = Status.TODO
+    else:
+        task.status = Status.DONE
+
     task.save()
     return JsonResponse({'success': True, 'new_status': task.status})
 

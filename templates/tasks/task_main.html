@@ -31,13 +31,26 @@
     </div>
   </div>
 </div>
-
-<!-- JavaScript -->
 <script>
+// 🔐 Get CSRF token from cookie
+function getCSRFToken() {
+  const name = 'csrftoken';
+  const cookies = document.cookie.split(';');
+  for (let cookie of cookies) {
+    cookie = cookie.trim();
+    if (cookie.startsWith(name + '=')) {
+      return decodeURIComponent(cookie.substring(name.length + 1));
+    }
+  }
+  return '';
+}
+
 document.addEventListener('DOMContentLoaded', function () {
-  //instantly search
+
+  // 🔍 Live search
   document.getElementById('search-input').addEventListener('keyup', function () {
-    const query = this.value;
+    const query = this.value.trim();
+
     fetch(`/tasks/ajax/search/?q=${query}`)
       .then(res => res.text())
       .then(data => {
@@ -45,17 +58,136 @@ document.addEventListener('DOMContentLoaded', function () {
       });
   });
 
-  //instantly Add task
+  // ➕ Open ADD TASK modal
   document.getElementById('add-task-btn').addEventListener('click', function () {
     fetch('/tasks/ajax/create/')
       .then(res => res.text())
-      .then(data => {
-        document.getElementById('modal-body').innerHTML = data;
+      .then(formHtml => {
+        document.getElementById('modal-body').innerHTML = formHtml;
         new bootstrap.Modal(document.getElementById('taskModal')).show();
       });
   });
 
-  // will add update , toggle status,delete
+
+  // 📝 Create OR Update (Submit form)
+  document.addEventListener('submit', function (e) {
+    if (e.target && e.target.id === 'task-form') {
+      e.preventDefault();
+
+      const form = e.target;
+      const formData = new FormData(form);
+      const taskId = form.dataset.id || ''; // update OR create
+      const url = taskId ? `/tasks/ajax/update/${taskId}/` : '/tasks/ajax/create/';
+
+      fetch(url, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'X-CSRFToken': getCSRFToken(),
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      })
+        .then(res => res.json())
+        .then(data => {
+
+          if (data.success) {
+            // Reload task list
+            fetch('/tasks/ajax/list/')
+              .then(res => res.text())
+              .then(listHtml => {
+                document.getElementById('task-container').innerHTML = listHtml;
+                bootstrap.Modal.getInstance(document.getElementById('taskModal')).hide();
+              });
+
+          } else {
+            // Reload the form with validation errors
+            fetch(url)
+              .then(res => res.text())
+              .then(formHtml => {
+                document.getElementById('modal-body').innerHTML = formHtml;
+              });
+          }
+
+        })
+        .catch(err => console.error('Error:', err));
+    }
+  });
+
+
+
+  // ✏️ Open EDIT modal
+  document.addEventListener('click', function (e) {
+    if (e.target && e.target.classList.contains('edit-task-btn')) {
+      const taskId = e.target.dataset.id;
+
+      fetch(`/tasks/ajax/update/${taskId}/`)
+        .then(res => res.text())
+        .then(formHtml => {
+          document.getElementById('modal-body').innerHTML = formHtml;
+          new bootstrap.Modal(document.getElementById('taskModal')).show();
+        });
+    }
+  });
+
+
+
+  // 🗑 Delete task
+  document.addEventListener('click', function (e) {
+    if (e.target && e.target.classList.contains('delete-task')) {
+      const taskId = e.target.dataset.id;
+
+      if (!confirm('Are you sure you want to delete this task?')) return;
+
+      fetch(`/tasks/ajax/delete/${taskId}/`, {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': getCSRFToken(),
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            fetch('/tasks/ajax/list/')
+              .then(res => res.text())
+              .then(listHtml => {
+                document.getElementById('task-container').innerHTML = listHtml;
+              });
+          }
+        })
+        .catch(err => console.error('Error:', err));
+    }
+  });
+
+
+
+  // 🔁 Toggle Status (DONE / TODO / IN PROGRESS)
+  document.addEventListener('click', function (e) {
+    if (e.target && e.target.classList.contains('toggle-status')) {
+      const taskId = e.target.dataset.id;
+
+      fetch(`/tasks/ajax/toggle-status/${taskId}/`, {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': getCSRFToken(),
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            fetch('/tasks/ajax/list/')
+              .then(res => res.text())
+              .then(listHtml => {
+                document.getElementById('task-container').innerHTML = listHtml;
+              });
+          }
+        })
+        .catch(err => console.error('Error:', err));
+    }
+  });
+
 });
 </script>
+
 {% endblock %}
