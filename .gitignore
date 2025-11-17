@@ -45,6 +45,7 @@ desktop.ini
 # MySQL dump files (optional)
 *.sql
 
-# Migrations (optional: keep if you want to track them)
-**/migrations/*.py
-!**/migrations/__init__.py
+# Migrations (track them for documentation)
+# Uncomment below to ignore migrations — but it's better to keep them
+# **/migrations/*.py
+# !**/migrations/__init__.py
