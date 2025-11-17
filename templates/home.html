@@ -4,6 +4,7 @@
 <div class="text-center mt-5">
     <h1 class="display-5">Welcome, {{ user.username }} 👋</h1>
     <p class="lead">Your smart task manager is ready.</p>
-    <a href="#" class="btn btn-outline-primary mt-3">Start Managing Tasks</a>
+    <a href="{% url 'task_main' %}" class="btn btn-outline-primary mt-3">Start Managing Tasks</a>
+    <p class="text-muted">Click the button below to view and manage your tasks dynamically.</p>
 </div>
 {% endblock %}
