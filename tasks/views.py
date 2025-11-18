@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Task
+from .models import Task,Project
 from .forms import TaskForm,ProjectForm
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
@@ -86,3 +86,7 @@ def ajax_project_create(request):
         html = render_to_string('tasks/partials/project_form.html', {'form': form}, request=request)
         return JsonResponse({'html': html})
 
+@login_required
+def project_main(request):
+    projects = Project.objects.filter(owner=request.user)
+    return render(request, 'tasks/project_main.html', {'projects': projects})
