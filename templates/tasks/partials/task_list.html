@@ -6,6 +6,8 @@
     </div>
 
     <div class="btn-group">
+      <!-- view task detail -->
+      <a href="{% url 'task_detail' task.id %}" class="btn btn-sm btn-outline-secondary">📄 Details</a>
       <!-- Toggle status -->
       <button class="btn btn-sm btn-success toggle-status" data-id="{{ task.id }}" title="Toggle status">
         {% if task.status == 'done' %}✔{% else %}⏳{% endif %}
