@@ -36,6 +36,10 @@
                         <a class="nav-link {% if '/trash/' in request.path %}active{% endif %}"
                         href="{% url 'task_trash' %}">🗑 Trash</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if '/about/' in request.path %}active{% endif %}"
+                         href="{% url 'about' %}">ℹ️ About</a>
+                    </li>
                     {% endif %}
                 </ul>
 

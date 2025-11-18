@@ -133,3 +133,7 @@ def delete_task_permanent(request, pk):
 def empty_trash(request):
     Task.objects.filter(owner=request.user, is_deleted=True).delete()
     return redirect('task_trash')
+
+@login_required
+def about_page(request):
+    return render(request, 'tasks/about.html')

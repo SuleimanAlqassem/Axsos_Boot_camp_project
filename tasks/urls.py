@@ -17,4 +17,5 @@ urlpatterns = [
     path('trash/restore/<int:pk>/', views.restore_task, name='restore_task'),
     path('trash/delete/<int:pk>/', views.delete_task_permanent, name='delete_task_permanent'),
     path('trash/empty/', views.empty_trash, name='empty_trash'),
+    path('about/', views.about_page, name='about'),
     ]
