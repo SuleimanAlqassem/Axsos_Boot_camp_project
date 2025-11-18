@@ -4,6 +4,10 @@ from .forms import TaskForm,ProjectForm
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.template.loader import render_to_string
+from .utils.email import send_task_summary_email
+from .utils.email import send_task_created_email
+from django.utils import timezone
+from datetime import datetime, time
 
 
 @login_required
@@ -24,6 +28,8 @@ def ajax_task_create(request):
             task = form.save(commit=False)
             task.owner = request.user
             task.save()
+            #using Gmail API for sending Email
+            send_task_created_email(request.user.email, task)
             return JsonResponse({'success': True})
         return JsonResponse({'success': False, 'errors': form.errors})
     else:
@@ -137,3 +143,43 @@ def empty_trash(request):
 @login_required
 def about_page(request):
     return render(request, 'tasks/about.html')
+
+# Gmail API
+# views.py
+# @login_required
+# def send_today_tasks(request):
+#     today = timezone.now().date()
+#     # tasks = Task.objects.filter(owner=request.user, updated_at__date=today)
+#     from datetime import datetime, time
+
+#     start = datetime.combine(today, time.min)
+#     end = datetime.combine(today, time.max)
+#     tasks = Task.objects.filter(owner=request.user, updated_at__range=(start, end))
+
+#     if tasks.exists():
+#         send_task_summary_email(request.user.email, tasks)
+#         return JsonResponse({'success': True, 'message': 'Email sent successfully'})
+#     else:
+#         return JsonResponse({'success': False, 'message': 'No tasks for today'})
+@login_required
+def send_tasks_by_range(request):
+    if request.method == 'POST':
+        start_str = request.POST.get('start')
+        end_str = request.POST.get('end')
+
+        try:
+            start = datetime.fromisoformat(start_str)
+            end = datetime.fromisoformat(end_str)
+        except Exception:
+            return JsonResponse({'success': False, 'message': 'Invalid date format'})
+
+        tasks = Task.objects.filter(owner=request.user, updated_at__range=(start, end))
+
+        if tasks.exists():
+            send_task_summary_email(request.user.email, tasks)
+            return JsonResponse({'success': True, 'message': 'Email sent successfully'})
+        else:
+            return JsonResponse({'success': False, 'message': 'No tasks in selected range'})
+    
+
+

@@ -12,6 +12,16 @@
   <button class="btn btn-primary mb-3" id="add-task-btn" data-title="Create Task">Add Task</button>
   <!-- add Project -->
   <button class="btn btn-primary mb-3" id="add-project-btn" data-title="Create Project">+ New Project</button>
+  <h3>📧 Submit a summary of tasks by time range</h3>
+  <form id="sendTasksForm" style="margin-bottom: 20px;">
+    <label for="start">from:</label>
+    <input type="datetime-local" name="start" required>
+    <label for="end">to:</label>
+    <input type="datetime-local" name="end" required>
+    <button type="submit">Send email</button>
+  </form>
+  <div id="emailStatus" style="margin-top: 10px; font-weight: bold;"></div>
+
   <!-- tasks list -->
   <div id="task-container">
     {% include 'tasks/partials/task_list.html' %}
@@ -228,6 +238,26 @@ document.addEventListener('submit', function (e) {
     });
   }
 });
+});
+
+
+document.getElementById('sendTasksForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  const formData = new FormData(this);
+
+  fetch('/tasks/api/send-tasks-by-range/', {
+    method: 'POST',
+    headers: {
+      'X-CSRFToken': '{{ csrf_token }}'
+    },
+    body: formData
+  })
+  .then(res => res.json())
+  .then(data => {
+    const statusDiv = document.getElementById('emailStatus');
+    statusDiv.textContent = data.message;
+    statusDiv.style.color = data.success ? 'green' : 'red';
+  });
 });
 </script>
 
