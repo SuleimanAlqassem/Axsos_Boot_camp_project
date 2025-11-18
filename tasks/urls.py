@@ -14,4 +14,7 @@ urlpatterns = [
     path('detail/<int:pk>/', views.task_detail, name='task_detail'),
     path('note/add/<int:task_id>/', views.add_note, name='add_note'),
     path('trash/', views.task_trash, name='task_trash'),
-]
+    path('trash/restore/<int:pk>/', views.restore_task, name='restore_task'),
+    path('trash/delete/<int:pk>/', views.delete_task_permanent, name='delete_task_permanent'),
+    path('trash/empty/', views.empty_trash, name='empty_trash'),
+    ]

@@ -4,6 +4,10 @@
   <h2>🗑 Archived Tasks</h2>
 
   <a href="{% url 'task_main' %}" class="btn btn-outline-secondary mb-3">← Back to Tasks</a>
+  <form method="post" action="{% url 'empty_trash' %}" onsubmit="return confirm('Delete all archived tasks permanently?');">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger mb-3">🧹 Empty Trash</button>
+  </form>
 
   {% for task in tasks %}
     <div class="card mb-2">

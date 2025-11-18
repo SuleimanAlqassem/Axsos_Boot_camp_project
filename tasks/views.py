@@ -115,3 +115,21 @@ def add_note(request, task_id):
 def task_trash(request):
     tasks = Task.objects.filter(owner=request.user, is_deleted=True).order_by('-updated_at')
     return render(request, 'tasks/task_trash.html', {'tasks': tasks})
+
+@login_required
+def restore_task(request, pk):
+    task = get_object_or_404(Task, pk=pk, owner=request.user, is_deleted=True)
+    task.is_deleted = False
+    task.save()
+    return redirect('task_trash')
+
+@login_required
+def delete_task_permanent(request, pk):
+    task = get_object_or_404(Task, pk=pk, owner=request.user, is_deleted=True)
+    task.delete()
+    return redirect('task_trash')
+
+@login_required
+def empty_trash(request):
+    Task.objects.filter(owner=request.user, is_deleted=True).delete()
+    return redirect('task_trash')
