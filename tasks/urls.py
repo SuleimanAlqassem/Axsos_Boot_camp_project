@@ -9,4 +9,5 @@ urlpatterns = [
     path('ajax/toggle-status/<int:pk>/', views.ajax_task_toggle_status, name='ajax_task_toggle_status'),
     path('ajax/search/', views.ajax_task_search, name='ajax_task_search'),
     path('dashboard/', views.task_main, name='task_main'),
+    path('ajax/project/create/', views.ajax_project_create, name='ajax_project_create')
 ]
