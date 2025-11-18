@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Task,Project
+from .models import Task,Project,Note
 from .forms import TaskForm,ProjectForm
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
@@ -90,3 +90,23 @@ def ajax_project_create(request):
 def project_main(request):
     projects = Project.objects.filter(owner=request.user)
     return render(request, 'tasks/project_main.html', {'projects': projects})
+
+from django.shortcuts import get_object_or_404
+from .models import Task, Note
+
+@login_required
+def task_detail(request, pk):
+    task = get_object_or_404(Task, pk=pk, owner=request.user)
+    notes = Note.objects.filter(task=task).order_by('-updated_at')
+    return render(request, 'tasks/task_detail.html', {'task': task, 'notes': notes})
+
+from django.shortcuts import redirect
+
+@login_required
+def add_note(request, task_id):
+    task = get_object_or_404(Task, pk=task_id, owner=request.user)
+    if request.method == 'POST':
+        content = request.POST.get('content', '').strip()
+        if content:
+            Note.objects.create(task=task, content=content,author=request.user)
+    return redirect('task_detail', pk=task.id)
