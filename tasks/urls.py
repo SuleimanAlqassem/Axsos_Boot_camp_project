@@ -11,4 +11,6 @@ urlpatterns = [
     path('dashboard/', views.task_main, name='task_main'),
     path('ajax/project/create/', views.ajax_project_create, name='ajax_project_create'),
     path('projects/', views.project_main, name='project_main'),
+    path('detail/<int:pk>/', views.task_detail, name='task_detail'),
+    path('note/add/<int:task_id>/', views.add_note, name='add_note'),
 ]
