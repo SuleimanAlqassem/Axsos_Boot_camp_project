@@ -9,8 +9,9 @@
   <input type="text" id="search-input" class="form-control mb-3" placeholder="Search tasks..." />
 
   <!-- add task -->
-  <button class="btn btn-primary mb-3" id="add-task-btn">Add Task</button>
-
+  <button class="btn btn-primary mb-3" id="add-task-btn" data-title="Create Task">Add Task</button>
+  <!-- add Project -->
+  <button class="btn btn-primary mb-3" id="add-project-btn" data-title="Create Project">+ New Project</button>
   <!-- tasks list -->
   <div id="task-container">
     {% include 'tasks/partials/task_list.html' %}
@@ -60,10 +61,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // ➕ Open ADD TASK modal
   document.getElementById('add-task-btn').addEventListener('click', function () {
+    const title=this.dataset.title;
     fetch('/tasks/ajax/create/')
       .then(res => res.text())
       .then(formHtml => {
         document.getElementById('modal-body').innerHTML = formHtml;
+        document.querySelector('#taskModal .modal-title').innerText = title;
         new bootstrap.Modal(document.getElementById('taskModal')).show();
       });
   });
@@ -119,11 +122,12 @@ document.addEventListener('DOMContentLoaded', function () {
   document.addEventListener('click', function (e) {
     if (e.target && e.target.classList.contains('edit-task-btn')) {
       const taskId = e.target.dataset.id;
-
+      const title=e.target.dataset.title;
       fetch(`/tasks/ajax/update/${taskId}/`)
         .then(res => res.text())
         .then(formHtml => {
           document.getElementById('modal-body').innerHTML = formHtml;
+          document.querySelector('#taskModal .modal-title').innerText = title;
           new bootstrap.Modal(document.getElementById('taskModal')).show();
         });
     }
@@ -187,6 +191,43 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   });
 
+  //Open Project Model and add project
+  document.getElementById('add-project-btn').addEventListener('click', function () {
+  const title=this.dataset.title;
+  fetch('/tasks/ajax/project/create/')
+    .then(res => res.json())
+    .then(data => {
+      document.getElementById('modal-body').innerHTML = data.html;
+      document.querySelector('#taskModal .modal-title').innerText = title;
+      new bootstrap.Modal(document.getElementById('taskModal')).show();
+    });
+});
+
+document.addEventListener('submit', function (e) {
+  if (e.target && e.target.id === 'project-form') {
+    e.preventDefault();
+    const form = e.target;
+    const formData = new FormData(form);
+
+    fetch('/tasks/ajax/project/create/', {
+      method: 'POST',
+      body: formData,
+      headers: {
+        'X-CSRFToken': getCSRFToken(),
+        'X-Requested-With': 'XMLHttpRequest'
+      }
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        bootstrap.Modal.getInstance(document.getElementById('taskModal')).hide();
+        // يمكنك إعادة تحميل قائمة المشاريع هنا إذا أردت
+      } else {
+        document.getElementById('modal-body').innerHTML = data.html;
+      }
+    });
+  }
+});
 });
 </script>
 
