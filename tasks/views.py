@@ -110,3 +110,8 @@ def add_note(request, task_id):
         if content:
             Note.objects.create(task=task, content=content,author=request.user)
     return redirect('task_detail', pk=task.id)
+
+@login_required
+def task_trash(request):
+    tasks = Task.objects.filter(owner=request.user, is_deleted=True).order_by('-updated_at')
+    return render(request, 'tasks/task_trash.html', {'tasks': tasks})
