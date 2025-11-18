@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+  <h2>{{ task.title }}</h2>
+  <p>{{ task.description }}</p>
+  <p>Status: <strong>{{ task.status }}</strong></p>
+  <p>Project: {{ task.project.name|default_if_none:"" }}</p>
+  <p>Last updated: {{ task.updated_at|date:"Y-m-d H:i" }}</p>
+
+  <hr>
+  <h4>Notes</h4>
+
+  <!-- Form to add note -->
+  <form method="post" action="{% url 'add_note' task.id %}">
+    {% csrf_token %}
+    <div class="mb-3">
+      <textarea name="content" class="form-control" rows="3" placeholder="Add a note..."></textarea>
+    </div>
+    <a href="{% url 'task_main' %}" class="btn btn-primary">← Back to Tasks</a>
+    <button type="submit" class="btn btn-primary">Add Note</button>
+
+  </form>
+
+  <!-- Notes list -->
+  <ul class="list-group mt-3">
+    {% for note in notes %}
+      <li class="list-group-item">
+        <p>{{ note.content }}</p>
+        <small class="text-muted">Updated: {{ note.updated_at|date:"Y-m-d H:i" }}</small>
+      </li>
+    {% empty %}
+      <li class="list-group-item">No notes yet.</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endblock %}
