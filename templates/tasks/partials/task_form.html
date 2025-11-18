@@ -25,5 +25,13 @@
     {% endif %}
   </div>
 
+  <div class="mb-3">
+    {{ form.project.label_tag }}
+    {{ form.project }}
+    {% if form.project.errors %}
+      <div class="text-danger">{{ form.project.errors }}</div>
+    {% endif %}
+  </div>
+
   <button type="submit" class="btn btn-primary">Save</button>
 </form>
