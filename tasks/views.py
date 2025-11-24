@@ -97,16 +97,11 @@ def project_main(request):
     projects = Project.objects.filter(owner=request.user)
     return render(request, 'tasks/project_main.html', {'projects': projects})
 
-from django.shortcuts import get_object_or_404
-from .models import Task, Note
-
 @login_required
 def task_detail(request, pk):
     task = get_object_or_404(Task, pk=pk, owner=request.user)
     notes = Note.objects.filter(task=task).order_by('-updated_at')
     return render(request, 'tasks/task_detail.html', {'task': task, 'notes': notes})
-
-from django.shortcuts import redirect
 
 @login_required
 def add_note(request, task_id):
@@ -145,22 +140,20 @@ def about_page(request):
     return render(request, 'tasks/about.html')
 
 # Gmail API
-# views.py
-# @login_required
-# def send_today_tasks(request):
-#     today = timezone.now().date()
-#     # tasks = Task.objects.filter(owner=request.user, updated_at__date=today)
-#     from datetime import datetime, time
 
-#     start = datetime.combine(today, time.min)
-#     end = datetime.combine(today, time.max)
-#     tasks = Task.objects.filter(owner=request.user, updated_at__range=(start, end))
+@login_required
+def send_today_tasks(request):
+    today = timezone.now().date()
+    start = datetime.combine(today, time.min)
+    end = datetime.combine(today, time.max)
+    tasks = Task.objects.filter(owner=request.user, updated_at__range=(start, end))
 
-#     if tasks.exists():
-#         send_task_summary_email(request.user.email, tasks)
-#         return JsonResponse({'success': True, 'message': 'Email sent successfully'})
-#     else:
-#         return JsonResponse({'success': False, 'message': 'No tasks for today'})
+    if tasks.exists():
+        send_task_summary_email(request.user.email, tasks)
+        return JsonResponse({'success': True, 'message': 'Email sent successfully'})
+    else:
+        return JsonResponse({'success': False, 'message': 'No tasks for today'})
+
 @login_required
 def send_tasks_by_range(request):
     if request.method == 'POST':
@@ -180,6 +173,28 @@ def send_tasks_by_range(request):
             return JsonResponse({'success': True, 'message': 'Email sent successfully'})
         else:
             return JsonResponse({'success': False, 'message': 'No tasks in selected range'})
-    
+        
+@login_required
+def ajax_project_edit(request, pk):
+    project = get_object_or_404(Project, pk=pk, owner=request.user)
+
+    if request.method == 'POST':
+        form = ProjectForm(request.POST, instance=project)
+        if form.is_valid():
+            form.save()
+            return JsonResponse({'success': True})
+        else:
+            html = render_to_string('tasks/partials/project_form.html', {'form': form}, request=request)
+            return JsonResponse({'success': False, 'html': html})
+
+    # GET — إعادة النموذج داخل المودال
+    form = ProjectForm(instance=project)
+    html = render_to_string('tasks/partials/project_form.html', {'form': form}, request=request)
+    return JsonResponse({'html': html})
 
 
+@login_required
+def ajax_project_delete(request, pk):
+    project = get_object_or_404(Project, pk=pk, owner=request.user)
+    project.delete()
+    return JsonResponse({'success': True})

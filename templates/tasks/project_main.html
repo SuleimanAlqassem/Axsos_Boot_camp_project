@@ -12,25 +12,55 @@
   <!-- قائمة المشاريع -->
   <div id="project-container">
     {% for project in projects %}
-      <div class="card mb-2">
-        <div class="card-body">
+    <div class="card mb-3">
+      <div class="card-body">
+
+        <div class="d-flex justify-content-between">
           <h5 class="card-title">{{ project.name }}</h5>
-          <p class="card-text">{{ project.description }}</p>
-          <small class="text-muted">Created at: {{ project.created_at|date:"Y-m-d H:i" }}</small>
+
+          <div>
+            <button 
+                class="btn btn-sm btn-outline-secondary edit-project-btn" 
+                data-id="{{ project.id }}">
+                Edit
+            </button>
+
+            <button 
+                class="btn btn-sm btn-outline-danger delete-project-btn" 
+                data-id="{{ project.id }}">
+                Delete
+            </button>
+          </div>
         </div>
+
+        <p class="card-text">{{ project.description }}</p>
+        <small class="text-muted">Created at: {{ project.created_at|date:"Y-m-d H:i" }}</small>
+
+        <hr>
+
+        <h6>Project Tasks:</h6>
+        <ul class="list-group">
+          {% for task in project.tasks.all %}
+            <li class="list-group-item">
+              <a href="{% url 'task_detail' task.id %}">{{ task.title }}</a>
+            </li>
+          {% empty %}
+            <li class="list-group-item text-muted">No tasks in this project.</li>
+          {% endfor %}
+        </ul>
+
       </div>
-    {% empty %}
-      <p>No projects yet.</p>
+    </div>
     {% endfor %}
-  </div>
 </div>
+
 
 <!-- مودال النموذج -->
 <div class="modal fade" id="projectModal" tabindex="-1" aria-labelledby="projectModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="projectModalLabel">Add Project</h5>
+        <h5 class="modal-title" id="projectModalLabel"></h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body" id="modal-body">
@@ -59,14 +89,32 @@ function getCSRFToken() {
 
 // فتح مودال إضافة مشروع
 document.getElementById('add-project-btn').addEventListener('click', function () {
+  document.getElementById('projectModalLabel').innerText = "Add Project";
   fetch('/tasks/ajax/project/create/')
     .then(res => res.json())
     .then(data => {
       document.getElementById('modal-body').innerHTML = data.html;
+      document.getElementById('project-form').dataset.url = '/tasks/ajax/project/create/';
       new bootstrap.Modal(document.getElementById('projectModal')).show();
     });
 });
 
+// فتح مودال تعديل مشروع
+document.addEventListener('click', function (e) {
+  if (e.target.classList.contains('edit-project-btn')) {
+    document.getElementById('projectModalLabel').innerText = "Edit Project";
+    
+    const projectId = e.target.dataset.id;
+
+    fetch(`/tasks/ajax/project/${projectId}/edit/`)
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById('modal-body').innerHTML = data.html;
+        document.getElementById('project-form').dataset.url = `/tasks/ajax/project/${projectId}/edit/`;
+        new bootstrap.Modal(document.getElementById('projectModal')).show();
+      });
+  }
+});
 
 // إرسال النموذج
 document.addEventListener('submit', function (e) {
@@ -74,15 +122,16 @@ document.addEventListener('submit', function (e) {
     e.preventDefault();
     const form = e.target;
     const formData = new FormData(form);
-
-    fetch('/tasks/ajax/project/create/', {
+    const url = form.dataset.url;
+    context={
       method: 'POST',
       body: formData,
       headers: {
         'X-CSRFToken': getCSRFToken(),
         'X-Requested-With': 'XMLHttpRequest'
-      }
-    })
+      }}
+
+    fetch(url, context)
     .then(res => res.json())
     .then(data => {
       if (data.success) {
@@ -94,5 +143,32 @@ document.addEventListener('submit', function (e) {
     });
   }
 });
+
+
+
+
+// حذف مشروع
+document.addEventListener("click", function (e) {
+  if (e.target.classList.contains("delete-project-btn")) {
+    const id = e.target.dataset.id;
+
+    if (!confirm("Delete this project?")) return;
+
+    fetch(`/tasks/ajax/project/${id}/delete/`, {
+      method: "POST",
+      headers: {
+        "X-CSRFToken": getCSRFToken(),
+        "X-Requested-With": "XMLHttpRequest"
+      }
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        location.reload();
+      }
+    });
+  }
+});
+
 </script>
 {% endblock %}

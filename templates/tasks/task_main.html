@@ -12,6 +12,8 @@
   <button class="btn btn-primary mb-3" id="add-task-btn" data-title="Create Task">Add Task</button>
   <!-- add Project -->
   <button class="btn btn-primary mb-3" id="add-project-btn" data-title="Create Project">+ New Project</button>
+  <button id="sendTodayBtn" class="btn btn-primary mb-3">Submit today's tasks</button>
+  <div id="todayStatus"></div>
   <h3>📧 Submit a summary of tasks by time range</h3>
   <form id="sendTasksForm" style="margin-bottom: 20px;">
     <label for="start">from:</label>
@@ -240,7 +242,7 @@ document.addEventListener('submit', function (e) {
 });
 });
 
-
+//send-tasks-by-range 
 document.getElementById('sendTasksForm').addEventListener('submit', function(e) {
   e.preventDefault();
   const formData = new FormData(this);
@@ -259,6 +261,18 @@ document.getElementById('sendTasksForm').addEventListener('submit', function(e) 
     statusDiv.style.color = data.success ? 'green' : 'red';
   });
 });
+
+//send-today-tasks
+document.getElementById('sendTodayBtn').addEventListener('click', function() {
+  fetch('/tasks/api/send-today-tasks/')
+    .then(res => res.json())
+    .then(data => {
+      const statusDiv = document.getElementById('todayStatus');
+      statusDiv.textContent = data.message;
+      statusDiv.style.color = data.success ? 'green' : 'red';
+    });
+});
+
 </script>
 
 {% endblock %}

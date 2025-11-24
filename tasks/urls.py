@@ -19,5 +19,7 @@ urlpatterns = [
     path('trash/empty/', views.empty_trash, name='empty_trash'),
     path('about/', views.about_page, name='about'),
     path('api/send-tasks-by-range/', views.send_tasks_by_range, name='send_tasks_by_range'),
-    # path('api/send-today-tasks/', views.send_today_tasks, name='send_today_tasks'),
+    path('api/send-today-tasks/', views.send_today_tasks, name='send_today_tasks'),
+    path('ajax/project/<int:pk>/edit/', views.ajax_project_edit, name='ajax_project_edit'),
+    path('ajax/project/<int:pk>/delete/', views.ajax_project_delete, name='ajax_project_delete'),
 ]
