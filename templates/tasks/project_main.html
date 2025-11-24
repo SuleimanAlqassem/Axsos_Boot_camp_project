@@ -8,9 +8,11 @@
   <!-- زر إضافة مشروع -->
   <a href="{% url 'task_main' %}" class="btn btn-outline-primary mb-3">← Back to Tasks</a>
   <button id="add-project-btn" class="btn btn-outline-primary mb-3">+ New Project</button>
+  <div id="toast-container" class="position-fixed bottom-0 end-0 p-3" style="z-index: 1055;"></div>
 
   <!-- قائمة المشاريع -->
   <div id="project-container">
+    
     {% for project in projects %}
     <div class="card mb-3">
       <div class="card-body">
@@ -43,9 +45,10 @@
           {% for task in project.tasks.all %}
             <li class="list-group-item">
               <a href="{% url 'task_detail' task.id %}">{{ task.title }}</a>
+              <small class="text-muted">{{ task.status }}</small>
             </li>
           {% empty %}
-            <li class="list-group-item text-muted">No tasks in this project.</li>
+            <li class="list-group-item text-muted">No tasks yet.</li>
           {% endfor %}
         </ul>
 
@@ -70,6 +73,8 @@
   </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{% static 'tasks/js/helpers.js' %}"></script>
+
 {% endblock %}
 
 {% block scripts %}
@@ -136,7 +141,18 @@ document.addEventListener('submit', function (e) {
     .then(data => {
       if (data.success) {
         bootstrap.Modal.getInstance(document.getElementById('projectModal')).hide();
-        location.reload(); 
+        const projectContainer = document.getElementById('project-container');
+
+        // إذا كان تعديل، نبحث عن البطاقة القديمة
+        const existingCard = document.querySelector(`#project-container .card[data-id='${form.dataset.id}']`);
+        if (existingCard) {
+          existingCard.replaceWith(new DOMParser().parseFromString(data.html, 'text/html').body.firstChild);
+        } else {
+          // إضافة المشروع الجديد في الأعلى
+          projectContainer.prepend(new DOMParser().parseFromString(data.html, 'text/html').body.firstChild);
+        }
+       showToast("Project saved successfully!");
+
       } else {
         document.getElementById('modal-body').innerHTML = data.html;
       }
@@ -164,7 +180,9 @@ document.addEventListener("click", function (e) {
     .then(res => res.json())
     .then(data => {
       if (data.success) {
-        location.reload();
+        showToast("Project deleted successfully!");
+        const card = e.target.closest('.card'); // إيجاد البطاقة المقابلة للزر
+        card.remove(); // إزالة البطاقة مباشرة من الصفحة
       }
     });
   }

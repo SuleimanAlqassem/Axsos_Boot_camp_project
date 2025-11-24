@@ -83,7 +83,8 @@ def ajax_project_create(request):
             project = form.save(commit=False)
             project.owner = request.user
             project.save()
-            return JsonResponse({'success': True})
+            html = render_to_string('tasks/partials/project_card.html', {'project': project})
+            return JsonResponse({'success': True,'html': html})
         else:
             html = render_to_string('tasks/partials/project_form.html', {'form': form}, request=request)
             return JsonResponse({'success': False, 'html': html})
@@ -94,7 +95,7 @@ def ajax_project_create(request):
 
 @login_required
 def project_main(request):
-    projects = Project.objects.filter(owner=request.user)
+    projects = Project.objects.filter(owner=request.user).order_by('-created_at')
     return render(request, 'tasks/project_main.html', {'projects': projects})
 
 @login_required
@@ -181,8 +182,9 @@ def ajax_project_edit(request, pk):
     if request.method == 'POST':
         form = ProjectForm(request.POST, instance=project)
         if form.is_valid():
-            form.save()
-            return JsonResponse({'success': True})
+            project=form.save()
+            html = render_to_string('tasks/partials/project_card.html', {'project': project}, request=request)
+            return JsonResponse({'success': True,'html': html})
         else:
             html = render_to_string('tasks/partials/project_form.html', {'form': form}, request=request)
             return JsonResponse({'success': False, 'html': html})

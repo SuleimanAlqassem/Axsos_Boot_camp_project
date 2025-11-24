@@ -1,0 +1,25 @@
+<div class="card mb-3" data-id="{{ project.id }}">
+  <div class="card-body">
+    <div class="d-flex justify-content-between">
+      <h5 class="card-title">{{ project.name }}</h5>
+      <div>
+        <button class="btn btn-sm btn-outline-secondary edit-project-btn" data-id="{{ project.id }}">Edit</button>
+        <button class="btn btn-sm btn-outline-danger delete-project-btn" data-id="{{ project.id }}">Delete</button>
+      </div>
+    </div>
+    <p class="card-text">{{ project.description }}</p>
+    <small class="text-muted">Created at: {{ project.created_at|date:"Y-m-d H:i" }}</small>
+    <hr>
+    <h6>Project Tasks:</h6>
+    <ul class="list-group">
+      {% for task in project.tasks.all %}
+        <li class="list-group-item">
+          <a href="{% url 'task_detail' task.id %}">{{ task.title }}</a>
+          <small class="text-muted">{{ task.status }}</small>
+        </li>
+      {% empty %}
+        <li class="list-group-item text-muted">No tasks yet.</li>
+      {% endfor %}
+    </ul>
+  </div>
+</div>
