@@ -62,8 +62,10 @@ def ajax_task_toggle_status(request, pk):
     Status = Task.Status
     if task.status == Status.DONE:
         task.status = Status.TODO
+        task.is_completed=False
     else:
         task.status = Status.DONE
+        task.is_completed=True
 
     task.save()
     return JsonResponse({'success': True, 'new_status': task.status})
@@ -200,3 +202,28 @@ def ajax_project_delete(request, pk):
     project = get_object_or_404(Project, pk=pk, owner=request.user)
     project.delete()
     return JsonResponse({'success': True})
+
+
+def dashboard_view(request):
+    return render(request, 'tasks/dashboard.html')
+
+@login_required
+def dashboard_api(request):
+    tasks = Task.objects.filter(owner=request.user, is_deleted=False)
+    projects = Project.objects.filter(owner=request.user)
+
+    total_tasks = tasks.count()
+    completed_tasks = tasks.filter(is_completed=True).count()
+    pending_tasks = total_tasks - completed_tasks
+
+    project_names = [p.name for p in projects]
+    project_task_counts = [p.tasks.filter(is_deleted=False).count() for p in projects]
+
+    return JsonResponse({
+        "total_tasks": total_tasks,
+        "completed_tasks": completed_tasks,
+        "pending_tasks": pending_tasks,
+        "total_projects": projects.count(),
+        "project_names": project_names,
+        "project_task_counts": project_task_counts,
+    })

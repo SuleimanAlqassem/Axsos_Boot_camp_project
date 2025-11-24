@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard{% endblock %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Dashboard</h2>
+
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">Total Tasks</h5>
+                    <p class="card-text fs-3" id="total-tasks">0</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">Completed Tasks</h5>
+                    <p class="card-text fs-3 text-success" id="completed-tasks">0</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">Pending Tasks</h5>
+                    <p class="card-text fs-3 text-warning" id="pending-tasks">0</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <canvas id="taskChart"></canvas>
+        </div>
+        <div class="col-md-6">
+            <canvas id="projectChart"></canvas>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{% static 'tasks/js/helpers.js' %}"></script>
+<script>
+let taskChart, projectChart;
+
+function updateDashboard() {
+    fetch("{% url 'dashboard_api' %}")
+    .then(res => res.json())
+    .then(data => {
+        // تحديث القيم في الكروت
+        document.getElementById('total-tasks').innerText = data.total_tasks;
+        document.getElementById('completed-tasks').innerText = data.completed_tasks;
+        document.getElementById('pending-tasks').innerText = data.pending_tasks;
+
+        // تحديث أو إنشاء مخطط المهمة
+        if (!taskChart) {
+            taskChart = new Chart(document.getElementById('taskChart'), {
+                type: 'pie',
+                data: {
+                    labels: ['Completed', 'Pending'],
+                    datasets: [{
+                        data: [data.completed_tasks, data.pending_tasks],
+                        backgroundColor: ['#198754', '#ffc107']
+                    }]
+                }
+            });
+        } else {
+            taskChart.data.datasets[0].data = [data.completed_tasks, data.pending_tasks];
+            taskChart.update();
+        }
+
+        // تحديث أو إنشاء مخطط المشاريع
+        if (!projectChart) {
+            projectChart = new Chart(document.getElementById('projectChart'), {
+                type: 'bar',
+                data: {
+                    labels: data.project_names,
+                    datasets: [{
+                        label: 'Tasks per Project',
+                        data: data.project_task_counts,
+                        backgroundColor: '#0d6efd'
+                    }]
+                },
+                options: {
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+        } else {
+            projectChart.data.labels = data.project_names;
+            projectChart.data.datasets[0].data = data.project_task_counts;
+            projectChart.update();
+        }
+    });
+}
+
+// تحديث عند تحميل الصفحة
+updateDashboard();
+
+// استدعاء تلقائي كل 5 ثواني (Live Update)
+setInterval(updateDashboard, 5000);
+</script>
+{% endblock %}

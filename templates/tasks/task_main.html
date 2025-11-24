@@ -4,7 +4,7 @@
 {% block content %}
 <div class="container mt-4">
   <h2>My Tasks</h2>
-
+  <div id="toast-container" class="position-fixed bottom-0 end-0 p-3" style="z-index: 1055;"></div>
   <!-- search -->
   <input type="text" id="search-input" class="form-control mb-3" placeholder="Search tasks..." />
 
@@ -44,6 +44,7 @@
     </div>
   </div>
 </div>
+<script src="{% static 'tasks/js/helpers.js' %}"></script>
 <script>
 // 🔐 Get CSRF token from cookie
 function getCSRFToken() {
@@ -112,6 +113,8 @@ document.addEventListener('DOMContentLoaded', function () {
               .then(listHtml => {
                 document.getElementById('task-container').innerHTML = listHtml;
                 bootstrap.Modal.getInstance(document.getElementById('taskModal')).hide();
+                showToast("Task saved successfully!");
+                updateDashboard();
               });
 
           } else {
@@ -169,6 +172,8 @@ document.addEventListener('DOMContentLoaded', function () {
               .then(listHtml => {
                 document.getElementById('task-container').innerHTML = listHtml;
               });
+              showToast("Task deleted successfully!");
+              updateDashboard();
           }
         })
         .catch(err => console.error('Error:', err));
@@ -197,6 +202,8 @@ document.addEventListener('DOMContentLoaded', function () {
               .then(listHtml => {
                 document.getElementById('task-container').innerHTML = listHtml;
               });
+              showToast("Task completed successfully!");
+              updateDashboard();
           }
         })
         .catch(err => console.error('Error:', err));
@@ -233,7 +240,8 @@ document.addEventListener('submit', function (e) {
     .then(data => {
       if (data.success) {
         bootstrap.Modal.getInstance(document.getElementById('taskModal')).hide();
-        // يمكنك إعادة تحميل قائمة المشاريع هنا إذا أردت
+        showToast("Project saved successfully!");
+        updateDashboard();
       } else {
         document.getElementById('modal-body').innerHTML = data.html;
       }
@@ -256,9 +264,7 @@ document.getElementById('sendTasksForm').addEventListener('submit', function(e) 
   })
   .then(res => res.json())
   .then(data => {
-    const statusDiv = document.getElementById('emailStatus');
-    statusDiv.textContent = data.message;
-    statusDiv.style.color = data.success ? 'green' : 'red';
+    showToast(data.message);
   });
 });
 
@@ -267,10 +273,9 @@ document.getElementById('sendTodayBtn').addEventListener('click', function() {
   fetch('/tasks/api/send-today-tasks/')
     .then(res => res.json())
     .then(data => {
-      const statusDiv = document.getElementById('todayStatus');
-      statusDiv.textContent = data.message;
-      statusDiv.style.color = data.success ? 'green' : 'red';
+      showToast(data.message);
     });
+    
 });
 
 </script>

@@ -8,7 +8,7 @@ urlpatterns = [
     path('ajax/delete/<int:pk>/', views.ajax_task_delete, name='ajax_task_delete'),
     path('ajax/toggle-status/<int:pk>/', views.ajax_task_toggle_status, name='ajax_task_toggle_status'),
     path('ajax/search/', views.ajax_task_search, name='ajax_task_search'),
-    path('dashboard/', views.task_main, name='task_main'),
+    path('task_main', views.task_main, name='task_main'),
     path('ajax/project/create/', views.ajax_project_create, name='ajax_project_create'),
     path('projects/', views.project_main, name='project_main'),
     path('detail/<int:pk>/', views.task_detail, name='task_detail'),
@@ -22,4 +22,7 @@ urlpatterns = [
     path('api/send-today-tasks/', views.send_today_tasks, name='send_today_tasks'),
     path('ajax/project/<int:pk>/edit/', views.ajax_project_edit, name='ajax_project_edit'),
     path('ajax/project/<int:pk>/delete/', views.ajax_project_delete, name='ajax_project_delete'),
+
+    path('dashboard/', views.dashboard_view, name='dashboard'),
+    path('dashboard/api/', views.dashboard_api, name='dashboard_api'),
 ]

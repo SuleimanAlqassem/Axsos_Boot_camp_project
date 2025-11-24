@@ -39,10 +39,16 @@ class Task(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    def mark_completed(self):
-        self.is_completed = True
-        self.completed_at = timezone.now()
-        self.save()
+
+    def save(self, *args, **kwargs):
+        if self.status == 'done' and not self.is_completed:
+            self.is_completed = True
+            self.completed_at = timezone.now()
+        elif self.status != 'done':
+            self.is_completed = False
+            self.completed_at = None
+        super().save(*args, **kwargs)
+
 
     def __str__(self):
         return self.title

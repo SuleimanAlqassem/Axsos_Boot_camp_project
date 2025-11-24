@@ -151,8 +151,8 @@ document.addEventListener('submit', function (e) {
           // إضافة المشروع الجديد في الأعلى
           projectContainer.prepend(new DOMParser().parseFromString(data.html, 'text/html').body.firstChild);
         }
-       showToast("Project saved successfully!");
-
+      showToast("Project saved successfully!");
+      updateDashboard();
       } else {
         document.getElementById('modal-body').innerHTML = data.html;
       }
@@ -182,7 +182,8 @@ document.addEventListener("click", function (e) {
       if (data.success) {
         showToast("Project deleted successfully!");
         const card = e.target.closest('.card'); // إيجاد البطاقة المقابلة للزر
-        card.remove(); // إزالة البطاقة مباشرة من الصفحة
+        card.remove(); 
+        updateDashboard();
       }
     });
   }
